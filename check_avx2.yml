@@ -1,0 +1,15 @@
+---
+- name: Check AVX2 support on multiple hosts
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Check for AVX2 support
+      shell: "grep -i avx2 /proc/cpuinfo || echo 'not found'"
+      register: avx2_check
+
+    - name: Save result to a local file
+      delegate_to: localhost
+      copy:
+        content: |
+          {{ inventory_hostname }}: {{ 'Supported' if 'avx2' in avx2_check.stdout.lower() else 'Not Supported' }}
+        dest: "./avx2_results/{{ inventory_hostname }}.txt"
